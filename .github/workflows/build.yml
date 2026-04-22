@@ -1,5 +1,4 @@
 name: 构建 War3Trainer EXE
-
 on:
   push:
     branches: [ main ]
@@ -7,20 +6,20 @@ on:
 
 jobs:
   build:
-    runs-on: windows-2022  # 这个环境自带 .NET Framework 4.6.1
+    runs-on: windows-2022
     steps:
-      - name: 拉取代码
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: 启用 MSBuild
         uses: microsoft/setup-msbuild@v2
 
+      # 🔥 关键：强制编译到 GitHub 环境自带的 .NET Framework 4.8
       - name: 编译 Release 版本
         run: |
-          msbuild War3Trainer.sln /p:Configuration=Release
+          msbuild War3Trainer.sln /p:Configuration=Release /p:TargetFrameworkVersion=v4.8 /p:OutputPath=bin/Release
 
-      - name: 上传 EXE 文件
+      - name: 上传 EXE
         uses: actions/upload-artifact@v4
         with:
           name: War3Trainer-EXE
-          path: War3Trainer/bin/Release/
+          path: "War3Trainer/bin/Release/"
