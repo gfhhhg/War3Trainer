@@ -1,4 +1,5 @@
-name: 构建 War3Trainer EXE
+name: 构建 War3Trainer 单文件 EXE
+
 on:
   push:
     branches: [ main ]
@@ -13,13 +14,19 @@ jobs:
       - name: 启用 MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      # 🔥 关键：强制编译到 GitHub 环境自带的 .NET Framework 4.8
-      - name: 编译 Release 版本
+      - name: 编译项目
         run: |
-          msbuild War3Trainer.sln /p:Configuration=Release /p:TargetFrameworkVersion=v4.8 /p:OutputPath=bin/Release
+          msbuild War3Trainer.sln /p:Configuration=Release /p:TargetFrameworkVersion=v4.8 /p:OutputPath=../publish
 
-      - name: 上传 EXE
+      # 🔥 核心：把所有文件打包成 1 个独立 EXE
+      - name: 安装 Costura.Fody 打包工具
+        run: |
+          cd War3Trainer
+          dotnet add package Costura.Fody
+          msbuild /p:Configuration=Release /p:TargetFrameworkVersion=v4.8 /p:OutputPath=../single-exe
+
+      - name: 上传单文件 EXE
         uses: actions/upload-artifact@v4
         with:
-          name: War3Trainer-EXE
-          path: "War3Trainer/bin/Release/"
+          name: War3Trainer-Single-EXE
+          path: single-exe/*.exe
