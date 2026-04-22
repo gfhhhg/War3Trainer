@@ -1,4 +1,4 @@
-name: 构建 War3Trainer EXE (.NET Framework 4.6.1)
+name: 构建 War3Trainer EXE
 
 on:
   push:
@@ -7,30 +7,20 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2022  # 这个环境自带 .NET Framework 4.6.1
     steps:
       - name: 拉取代码
         uses: actions/checkout@v4
 
-      # 安装 .NET Framework 4.6.1 目标包（必须）
-      - name: 安装 .NET Framework 4.6.1 Developer Pack
+      - name: 启用 MSBuild
         uses: microsoft/setup-msbuild@v2
-        with:
-          vswhere-path: C:\Program Files (x86)\Microsoft Visual Studio\Installer
-          vs-version: '[17.0,18.0)'
 
-      - name: 安装 .NET Framework 4.6.1 目标包
+      - name: 编译 Release 版本
         run: |
-          choco install netfx-461-devpack -y
+          msbuild War3Trainer.sln /p:Configuration=Release
 
-      # 编译
-      - name: 使用 MSBuild 编译 Release 版本
-        run: |
-          msbuild War3Trainer.sln /t:Rebuild /p:Configuration=Release /p:TargetFrameworkVersion=v4.6.1 /p:OutputPath=bin/Release
-
-      # 上传 EXE
-      - name: 上传构建产物
+      - name: 上传 EXE 文件
         uses: actions/upload-artifact@v4
         with:
           name: War3Trainer-EXE
-          path: '**/bin/Release/*.exe'
+          path: War3Trainer/bin/Release/
